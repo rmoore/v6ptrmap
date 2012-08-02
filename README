@@ -1,0 +1,13 @@
+v6ptrmap - IPv6 DNS PTR Mapper
+
+This work is based on the article "Finding v6 hosts by efficiently mapping
+ip6.arpa" by Peter van Dijk which can be found at [1]
+
+This program searches the ip6.arpa domains to find ipv6 hosts using the
+assumption that DNS servers will return NOERROR when there is a domain available
+in a further subdomain of the query, and NXDOMAIN when there is no further
+domain available. This makes mapping these ptr records very fast compared to the
+time it would take to do a linear search.
+
+[1] http://7bits.nl/blog/2012/03/26/finding-v6-hosts-by-efficiently-mapping-ip6-arpa
+
