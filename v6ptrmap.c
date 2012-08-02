@@ -11,14 +11,13 @@
 #include <signal.h>
 #include "ts_queue.h"
 
-#define THREADS 4
+#define THREADS 8
 
 void * worker(void * arg);
 void worker_function(struct ts_queue * queue, struct ts_queue * success);
 void push_all_prefixes(struct ts_queue * q, char * addr);
 int try_resolv(char * addr);
 void usage(char * name);
-void quit(int sig);
 
 struct args {
     struct ts_queue * success;
@@ -38,14 +37,9 @@ main(int argc, char **argv)
         exit(EXIT_SUCCESS);
     }
 
-    /* We are going to get killed from an alarm when the time comes. This will
-     * let us exit cleanly (and without zsh making a fuss.)
-     */
-    signal(SIGALRM, quit); 
-
     /* Initialize The Queues */
-    struct ts_queue * success = queue_init();
-    struct ts_queue * queue = queue_init();
+    struct ts_queue * success = queue_init(0); 
+    struct ts_queue * queue = queue_init(THREADS);
 
     /* Seed the queue with the initial value */
     for (i = 1; i < argc; i++) {
@@ -98,9 +92,6 @@ worker_function(struct ts_queue * queue, struct ts_queue * success)
     }
     free(addr);
 
-    /* Quit in 1 second if no other worker receives new work */
-    alarm(1);
-
     /* Anything else indicates that there aren't any more addresses down that
      * path. Usually we would get a code of 1 (NXDOMAIN) for this, but anything
      * really indicates that
@@ -138,10 +129,4 @@ void
 usage(char * name)
 {
     printf("Usage:\n\t%s <partial .ip6.arpa record>...\n", name);
-}
-
-void
-quit(int sig __attribute__((unused)))
-{
-    exit(EXIT_SUCCESS);
 }

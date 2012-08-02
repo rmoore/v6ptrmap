@@ -6,10 +6,12 @@
 #include "list.h"
 
 struct ts_queue *
-queue_init()
+queue_init(int count)
 {
     struct ts_queue * q = (struct ts_queue *) malloc(sizeof(struct ts_queue));
 
+    q->count = count;
+    q->waiting = 0;
     sem_init(&q->avail, 0, 0);
     pthread_mutex_init(&q->lock, NULL);
     list_init(&q->lst);
@@ -31,11 +33,19 @@ queue_pop(struct ts_queue * q)
 {
     void * elem;
 
+    /* Check if future accesses are possible, if not, quit the program. Also,
+     * note here that setting a ts_queue's count to 0 disables the quitting 
+     */
+    pthread_mutex_lock(&q->lock);
+    if ((++q->waiting == q->count) && queue_empty(q)) exit(EXIT_SUCCESS);
+    pthread_mutex_unlock(&q->lock);
+
     /* Wait for something to arrive in the queue. */
     sem_wait(&q->avail);
 
     /* Pull something off the queue */
     pthread_mutex_lock(&q->lock);
+    q->waiting--;
     elem = list_pop(&q->lst);
     pthread_mutex_unlock(&q->lock);
 
@@ -53,4 +63,10 @@ queue_push(struct ts_queue * q, void * elem)
 
     /* Post that there is something on the list */
     sem_post(&q->avail);
+}
+
+int
+queue_empty(struct ts_queue * q)
+{
+    return list_empty(&q->lst);
 }

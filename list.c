@@ -46,3 +46,9 @@ list_pop(struct list * l)
 
     return e;
 }
+
+int
+list_empty(struct list * l)
+{
+    return (l->first->next == l->last);
+}
