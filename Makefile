@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-ggdb3 -Wall -Wextra -Werror
+CFLAGS=-O1 -ggdb3 -Wall -Wextra -Werror -D_FORTIFY_SOURCE=2
 LDLIBS=-lpthread -lresolv
 OBJ=v6ptrmap.o ts_queue.o list.o
 

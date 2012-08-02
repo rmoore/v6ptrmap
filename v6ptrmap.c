@@ -117,7 +117,7 @@ push_all_prefixes(struct ts_queue * q, char * addr)
     int i;
     for(i = 0; i < 16; i++) {
         char * new_addr;
-        asprintf(&new_addr, hex_fmt[i], addr);
+        if (asprintf(&new_addr, hex_fmt[i], addr) < 0) abort();
         queue_push(q, new_addr);
     }
 }
